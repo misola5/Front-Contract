@@ -20,6 +20,17 @@
     
             <!-- Formulario para enviar ERC20 -->
     
+            <div id="sendETHFields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
+              <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar ETH</h2>
+              <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+              <input type="text" id="ethRecipientAddress" placeholder="Dirección Ethereum" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              
+              <label for="ethAmount" class="block text-gray-700 mt-4">Monto (ETH):</label>
+              <input type="number" id="ethAmount" placeholder="Monto en ETH" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              
+              <button id="btnSendETH" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar ETH</button>
+            </div> 
+
             <div id="sendERC20Fields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
               <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token ERC20</h2>
               <label for="recipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
@@ -30,74 +41,65 @@
               
               <button id="btnSendERC20" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar Token</button>
             </div>
-    
-            <div id="sendETHFields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
-              <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar ETH</h2>
-              <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
-              <input type="text" id="ethRecipientAddress" placeholder="Dirección Ethereum" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              
-              <label for="ethAmount" class="block text-gray-700 mt-4">Monto (ETH):</label>
-              <input type="number" id="ethAmount" placeholder="Monto en ETH" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              
-              <button id="btnSendETH" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar ETH</button>
-            </div>        
         </div>
 
         <script type="module">
           import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
 
-          let provider, signer, address, contract;
+          let provider, signer, address, contractTokenA, contractTokenB, contractSimpleDex;
 
-          //const TOKEN_ADDRESS = "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8";
-          // async function loadABI() {
-          //   const response = await fetch('https://gist.githubusercontent.com/veox/8800debbf56e24718f9f483e1e40c35c/raw/f853187315486225002ba56e5283c1dba0556e6f/erc20.abi.json');
-          //   const abi = await response.json();
-          //   return abi;
-          // }
+          const TOKEN_A_ADDRESS = "0xAddressOfTokenA"; // Cambiar por la dirección real de TokenA
+          const TOKEN_B_ADDRESS = "0xAddressOfTokenB"; // Cambiar por la dirección real de TokenB
+          const SIMPLE_DEX_ADDRESS = "0xAddressOfSimpleDex"; // Cambiar por la dirección real de SimpleDex
 
-          //cargando los datos Token A:
-          const TOKEN_ADDRESS = '0xF203047B80e86B79CfeA045fB598440754f314Bc';
-          async function loadABI() {
+          async function loadABI(contractName) {
+            let abi;
             try {
-              // Asegúrate de que el archivo JSON esté accesible en tu servidor (debe ser accesible desde el cliente)
-              const response = await fetch('assets/tokenA_ABI.json');
-              const data = await response.json();
-              console.log('ABI cargado correctamente')
-              console.log(data)
-              return data.abi;  // Devuelve el ABI que contiene la información del contrato
+              if (contractName === 'TokenA') {
+                abi = await fetch('assets/tokenA_ABI.json').then(res => res.json());
+              } else if (contractName === 'TokenB') {
+                abi = await fetch('assets/tokenB_ABI.json').then(res => res.json());
+              } else if (contractName === 'SimpleDex') {
+                abi = await fetch('assets/simpleDex_ABI.json').then(res => res.json());
+              }
+              return abi;
             } catch (error) {
               console.error('Error loading ABI:', error);
+            }
           }
-}
 
           async function connectWallet() {
             console.log('Connecting wallet...');
 
             if(window.ethereum) {
               console.log('Metamask detected');
-
               await window.ethereum.request({ method: 'eth_requestAccounts' });
+
               provider = new ethers.BrowserProvider(window.ethereum);
               signer = await provider.getSigner();
-
-              // DATOS DE LA WALLET:
               address = await signer.getAddress();
-              console.log("🚀 ~ connectWallet ~ address:", address)
+
               const balance = await provider.getBalance(address)
               const formattedBalance = ethers.formatEther(balance);
-              console.log("?? ~ connectWallet ~ formattedBalance:", formattedBalance)
 
-              //Contrato token:
-              const abi = await loadABI();
-              console.log('ABI cargado, creando contrato');
-              contract = new ethers.Contract(TOKEN_ADDRESS, abi, signer);
-              console.log("Contrato conectado", contract);
-              const decimals = await contract.decimals();
-              const tokenBalance = await contract.balanceOf(address);
-              const formattedTokenBalance = ethers.formatUnits(tokenBalance, decimals);
-              console.log("?? ~ connectWallet ~ formattedTokenBalance:", formattedTokenBalance)
+              // Cargar ABI para TokenA, TokenB y SimpleDex
+              const tokenAABI = await loadABI('TokenA');
+              const tokenBABI = await loadABI('TokenB');
+              const simpleDexABI = await loadABI('SimpleDex');
 
+              // Crear contratos
+              contractTokenA = new ethers.Contract(TOKEN_A_ADDRESS, tokenAABI.abi, signer);
+              contractTokenB = new ethers.Contract(TOKEN_B_ADDRESS, tokenBABI.abi, signer);
+              contractSimpleDex = new ethers.Contract(SIMPLE_DEX_ADDRESS, simpleDexABI.abi, signer);
 
+              // Obtener balances
+              const decimalsA = await contractTokenA.decimals();
+              const tokenABalance = await contractTokenA.balanceOf(address);
+              const formattedTokenABalance = ethers.formatUnits(tokenABalance, decimalsA);
+
+              const decimalsB = await contractTokenB.decimals();
+              const tokenBBalance = await contractTokenB.balanceOf(address);
+              const formattedTokenBBalance = ethers.formatUnits(tokenBBalance, decimalsB);
 
               document.getElementById('btnConnect').style.display = 'none';
               document.getElementById('btnDisconnect').style.display = 'inline';
@@ -109,9 +111,8 @@
               document.getElementById('sendETHFields').style.display = 'block';
 
               document.getElementById('ethBalance').innerText = `Balance de Wallet: ${formattedBalance} ETH`;
-              document.getElementById('erc20Balance').innerText = `Balance del Token: ${formattedTokenBalance}`;
-            }
-            else {
+              document.getElementById('erc20Balance').innerText = `Balance de TokenA: ${formattedTokenABalance}, TokenB: ${formattedTokenBBalance}`;
+            } else {
               console.error('Metamask not detected');
             }
           }
@@ -131,76 +132,74 @@
           }
 
           async function sendETH() {
-
             const recipientAddress = document.getElementById('ethRecipientAddress').value;
             const amount = document.getElementById('ethAmount').value;
 
             if(!ethers.isAddress(recipientAddress)) {
-              alert('Direcci�n de destinatario inv�lida');
+              alert('Dirección de destinatario inválida');
               return;
             }
 
             if(isNaN(amount) || amount <= 0) {
-              alert('Monto inv�lido');
+              alert('Monto inválido');
               return;
             }
+
             try {
               const tx = {
                 to: recipientAddress,
                 value: ethers.parseEther(amount)
               };
+
               const txResponse = await signer.sendTransaction(tx);
 
               await txResponse.wait();
 
-              console.log("?? ~ sendETH ~ txResponse", txResponse)
-              alert(`Transacci�n enviada con �xito: ${txResponse.hash}`);
+              alert(`Transacción enviada con éxito: ${txResponse.hash}`);
 
             } catch (error) {
               console.error('Error sending ETH', error);
               alert('Error enviando ETH');
             }
           }
-          
+
           async function sendToken() {
             const recipientAddress = document.getElementById('recipientAddress').value;
             const amount = document.getElementById('tokenAmount').value;
 
-
             if (!ethers.isAddress(recipientAddress)) {
-              alert("Direcci�n inv�lida.");
+              alert("Dirección inválida.");
               return;
             }
 
             if (isNaN(amount) || amount <= 0) {
-              alert("Monto inv�lido.");
+              alert("Monto inválido.");
               return;
             }
             
             try {
-              const decimals = await contract.decimals();
-              const amountToSend = ethers.parseUnits(amount, decimals);
+              const decimalsA = await contractTokenA.decimals();
+              const amountToSendA = ethers.parseUnits(amount, decimalsA);
 
-              const txApproval = await contract.approve(recipientAddress, amountToSend);
-              await txApproval.wait();
+              const txApprovalA = await contractTokenA.approve(recipientAddress, amountToSendA);
+              await txApprovalA.wait();
 
-              const tx = await contract.transfer(recipientAddress, amountToSend);
+              const txA = await contractTokenA.transfer(recipientAddress, amountToSendA);
 
-              await tx.wait();
+              await txA.wait();
 
-              console.log("?? ~ sendToken ~ tx", tx)
-              alert(`Transacci�n enviada con �xito: ${tx.hash}`);
+              alert(`Transacción enviada con éxito: ${txA.hash}`);
 
             } catch (error) {
-              console.error('Error sending ERC20', error);
-              alert('Error enviando ERC20');
+              console.error('Error sending TokenA', error);
+              alert('Error enviando TokenA');
             }
           }
 
           document.getElementById('btnConnect').addEventListener('click', connectWallet);
           document.getElementById('btnDisconnect').addEventListener('click', disconnectWallet);
           document.getElementById('btnSendETH').addEventListener('click', sendETH);
-
+          document.getElementById('btnSendERC20').addEventListener('click', sendToken);
         </script>
 
     </body>

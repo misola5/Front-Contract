@@ -93,6 +93,7 @@
               contract = new ethers.Contract(TOKEN_ADDRESS, abi, signer);
               console.log("Contrato conectado", contract);
               const decimals = await contract.decimals();
+              console.log('decimales: ', decimals)
               const tokenBalance = await contract.balanceOf(address);
               const formattedTokenBalance = ethers.formatUnits(tokenBalance, decimals);
               console.log("?? ~ connectWallet ~ formattedTokenBalance:", formattedTokenBalance)

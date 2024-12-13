@@ -1,208 +1,628 @@
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ethers App</title>
-        <script src="https://cdn.tailwindcss.com"></script>        
-    </head>
-    <body class="bg-gray-100 font-sans">
-        <div class="container mx-auto p-6">
-            <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">Intro to Ethers</h1>
-            <div class="text-center">
-              <button id="btnConnect" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition">Conectar wallet</button>
-              <button id="btnDisconnect" class="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition mt-4" style="display:none;">Desconectar</button>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimpleDex</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>       
+  </head>
+  <body class="bg-gray-100 font-sans">
+      <div class="container mx-auto p-6">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">_-SimpleDex-_</h1>
+        <div class="text-center">
+          <button id="btnConnect" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition">Conectar wallet</button>
+          <button id="btnDisconnect" class="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition mt-4" style="display:none;">Desconectar</button>
+        </div>
+        <p id="status" class="text-center text-gray-600 mt-4">Estado: Desconectado</p>
+
+        <!-- Mostrar balances -->
+        <div class="max-w-sm mx-auto p-6 bg-white shadow-lg rounded-lg " id="card1" style="display: none;">              
+          <p id="erc20BalanceA" style="display: none;" class="text-center text-xl text-gray-800 mt-4">Balance del Token A: 0</p>
+          <p id="erc20BalanceB" style="display: none;" class="text-center text-xl text-gray-800 mt-4">Balance del Token B: 0</p>
+          <p id="ethBalance" style="display: none;" class="text-center text-xl text-gray-800 mt-4">Balance de Wallet: 0 ETH</p>
+        </div>
+          
+          <!-- Button trigger modal -->
+        <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          Lanzar demo de modal
+        </button> -->
+
+          <!-- Modal -->
+          <!-- <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Título del modal</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div id="sendETHFields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token A</h2>
+                    <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+                    <input type="text" id="ethRecipientAddress" placeholder="Dirección Scroll Sepolia" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <label for="ethAmount" class="block text-gray-700 mt-4">Monto (TKA):</label>
+                    <input type="number" id="ethAmount" placeholder="Monto en ETH" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <button id="btnSendETH" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar TKA</button>
+                  </div> 
+                </div>
+                <div class="modal-footer">
+                  <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary">Guardar cambios</button> 
+                </div>
+              </div>
             </div>
-            <p id="status" class="text-center text-gray-600 mt-4">Estado: Desconectado</p>
-            
-            <!-- Mostrar balance del token ERC20 -->
-            <p id="erc20Balance" style="display: none;" class="text-center text-xl text-gray-800 mt-6">Balance del Token: 0</p>
-            <p id="ethBalance"  style="display: none;" class="text-center text-xl text-gray-800 mt-6">Balance de Wallet: 0 ETH</p>
-    
-            <!-- Formulario para enviar ERC20 -->
-    
-            <div id="sendERC20Fields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
-              <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token ERC20</h2>
-              <label for="recipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
-              <input type="text" id="recipientAddress" placeholder="Dirección Ethereum" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              
-              <label for="tokenAmount" class="block text-gray-700 mt-4">Monto (Token):</label>
-              <input type="number" id="tokenAmount" placeholder="Monto en Token" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              
-              <button id="btnSendERC20" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar Token</button>
+          </div> -->
+          
+        <!-- Formulario para enviar ERC20 A -->    
+        <div id="sendERC20Fields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-4">Token A (TKA)</h2>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Enviar Token
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Enviar TKA</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div id="sendETHFields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token A</h2>
+                    <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+                    <input type="text" id="ethRecipientAddress" placeholder="Dirección Scroll Sepolia" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <label for="tkaAmount" class="block text-gray-700 mt-4">Monto (TKA):</label>
+                    <input type="number" id="tkaAmount" placeholder="Monto en TKA" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <button id="btnSendTKA" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar TKA</button>
+                  </div> 
+                </div>
+                <div class="modal-footer">
+                  <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary">Guardar cambios</button> -->
+                </div>
+              </div>
             </div>
-    
-            <div id="sendETHFields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
-              <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar ETH</h2>
-              <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
-              <input type="text" id="ethRecipientAddress" placeholder="Dirección Ethereum" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              
-              <label for="ethAmount" class="block text-gray-700 mt-4">Monto (ETH):</label>
-              <input type="number" id="ethAmount" placeholder="Monto en ETH" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-              
-              <button id="btnSendETH" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar ETH</button>
-            </div>        
+          </div>
+
+          <!-- <label for="recipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+          <input type="text" id="recipientAddress" placeholder="Dirección Ethereum" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          
+          <label for="tokenAmount" class="block text-gray-700 mt-4">Monto (Token):</label>
+          <input type="number" id="tokenAmount" placeholder="Monto en Token" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          
+          <button id="btnSendERC20" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar Token</button> -->
         </div>
 
-        <script type="module">
-          import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
+        <!-- Formulario para enviar ERC20 B -->    
+        <div id="sendERC20Fields2" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-4">Token B (TKB)</h2>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal2">
+            Enviar Token
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Enviar TKB</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  
+                  <div id="sendETHFields"  class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token B</h2>
+                    <label for="tkbRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+                    <input type="text" id="tkbRecipientAddress" placeholder="Dirección Scroll Sepolia" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <label for="tkbAmount" class="block text-gray-700 mt-4">Monto (TKB):</label>
+                    <input type="number" id="tkbAmount" placeholder="Monto en TKB" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <button id="btnSendTKB" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar TKB</button>
+                  </div> 
+                </div>
+                <div class="modal-footer">
+                  <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary">Guardar cambios</button> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          let provider, signer, address, contract;
+        <!-- SimpleDex -->    
+        <div id="simpleDexFields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-4">SimpleDex</h2>
+          <div>
+            <div>
+              <span id="precioTKA"  class="text-center text-xl text-gray-800 mt-4">Precio Token A: </span>
+              <span id="cantidadTKA" class="text-center text-xl text-gray-800 mt-4">Stock: </span>
+            </div>
+            <div>
+              <span id="precioTKB"  class="text-center text-xl text-gray-800 mt-4">Precio Token B: </span>
+              <span id="cantidadTKB" class="text-center text-xl text-gray-800 mt-4">Stock: </span>
+            </div>            
+          </div>       
+          
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal3">
+            SWAP TKA -> TKB
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">SWAP TKA</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div id=""  class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">TKA-> TKB</h2>
+                    <!-- <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+                    <input type="text" id="ethRecipientAddress" placeholder="Dirección Scroll Sepolia" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"> -->
+                    
+                    <label for="tkaCantidad" class="block text-gray-700 mt-4">Cantidad TKA:</label>
+                    <input type="number" id="tkaCantidad" placeholder="Cantidad TKA a intercambiar" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <button id="btnSwapTKA" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Swap TKA</button>
+                  </div> 
+                </div>
+                <div class="modal-footer">
+                  <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary">Guardar cambios</button> -->
+                </div>
+              </div>
+            </div>
+          </div>  
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal4">
+            SWAP TKB -> TKA
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="exampleModal4" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">SWAP TKB</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div  class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">TKB-> TKA</h2>
+                    <!-- <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+                    <input type="text" id="ethRecipientAddress" placeholder="Dirección Scroll Sepolia" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                     -->
+                    <label for="tkbCantidad" class="block text-gray-700 mt-4">Cantidad TKB:</label>
+                    <input type="number" id="tkbCantidad" placeholder="Cantidad TKB a intercambiar" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <button id="btnSwapTKB" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">SWAP TKB</button>
+                  </div> 
+                </div>
+                <div class="modal-footer">
+                  <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary">Guardar cambios</button> -->
+                </div>
+              </div>
+            </div>
+          </div>  
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal5">
+            Agregar Liquidez
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="exampleModal5" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Enviar TKA</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div  class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token A</h2>
+                    <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+                    <input type="text" id="ethRecipientAddress" placeholder="Dirección Scroll Sepolia" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <label for="tkaAmount" class="block text-gray-700 mt-4">Monto (TKA):</label>
+                    <input type="number" id="tkaAmount" placeholder="Monto en TKA" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <button id="btnSendTKA" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar TKA</button>
+                  </div> 
+                </div>
+                <div class="modal-footer">
+                  <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary">Guardar cambios</button> -->
+                </div>
+              </div>
+            </div>
+          </div> 
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal6">
+            Retirar Liquidez
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="exampleModal6" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Enviar TKA</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div  class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token A</h2>
+                    <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
+                    <input type="text" id="ethRecipientAddress" placeholder="Dirección Scroll Sepolia" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <label for="tkaAmount" class="block text-gray-700 mt-4">Monto (TKA):</label>
+                    <input type="number" id="tkaAmount" placeholder="Monto en TKA" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <button id="btnSendTKA" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar TKA</button>
+                  </div> 
+                </div>
+                <div class="modal-footer">
+                  <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary">Guardar cambios</button> -->
+                </div>
+              </div>
+            </div>
+          </div> 
+        </div>
 
-          //const TOKEN_ADDRESS = "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8";
-          // async function loadABI() {
-          //   const response = await fetch('https://gist.githubusercontent.com/veox/8800debbf56e24718f9f483e1e40c35c/raw/f853187315486225002ba56e5283c1dba0556e6f/erc20.abi.json');
-          //   const abi = await response.json();
-          //   return abi;
-          // }
+      </div>
 
-          //cargando los datos Token A:
-          const TOKEN_ADDRESS = '0xF203047B80e86B79CfeA045fB598440754f314Bc';
-          async function loadABI() {
+      <script type="module">
+        import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
+
+        let provider, signer, address, contractA, contractB, contractDex;
+
+        //const TOKEN_ADDRESS = "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8";
+        // async function loadABI() {
+        //   const response = await fetch('https://gist.githubusercontent.com/veox/8800debbf56e24718f9f483e1e40c35c/raw/f853187315486225002ba56e5283c1dba0556e6f/erc20.abi.json');
+        //   const abi = await response.json();
+        //   return abi;
+        // }
+
+        //cargando los datos Token A y B:
+        const TOKEN_ADDRESS_A = '0xF203047B80e86B79CfeA045fB598440754f314Bc';
+        const TOKEN_ADDRESS_B = '0x1d20C33b53565eDf63acDcFaC4d8FB85fc72d4CB';
+        const SIMPLE_DEX_ADDRESS = '0xE77eB30A2745E075bbb83a54F6B7799CceC55c03';
+        //ABI_A
+        async function loadABI_A() {
             try {
               // Asegúrate de que el archivo JSON esté accesible en tu servidor (debe ser accesible desde el cliente)
               const response = await fetch('assets/tokenA_ABI.json');
-              const data = await response.json();
-              console.log('ABI cargado correctamente')
-              console.log(data)
-              return data.abi;  // Devuelve el ABI que contiene la información del contrato
+              const dataA = await response.json();
+              console.log('ABI Token A')
+              //console.log(data)
+              return dataA.abi;  // Devuelve el ABI que contiene la información del contrato
             } catch (error) {
               console.error('Error loading ABI:', error);
           }
-}
-
-          async function connectWallet() {
-            console.log('Connecting wallet...');
-
-            if(window.ethereum) {
-              console.log('Metamask detected');
-
-              await window.ethereum.request({ method: 'eth_requestAccounts' });
-              provider = new ethers.BrowserProvider(window.ethereum);
-              signer = await provider.getSigner();
-
-              // DATOS DE LA WALLET:
-              address = await signer.getAddress();
-              console.log("🚀 ~ connectWallet ~ address:", address)
-              const balance = await provider.getBalance(address)
-              const formattedBalance = ethers.formatEther(balance);
-              console.log("?? ~ connectWallet ~ formattedBalance:", formattedBalance)
-
-              //Contrato token:
-              const abi = await loadABI();
-              console.log('ABI cargado, creando contrato');
-              contract = new ethers.Contract(TOKEN_ADDRESS, abi, signer);
-              console.log("Contrato conectado", contract);
-              const decimals = await contract.decimals();
-              console.log('decimales: ', decimals)
-              const tokenBalance = await contract.balanceOf(address);
-              const formattedTokenBalance = ethers.formatUnits(tokenBalance, decimals);
-              console.log("?? ~ connectWallet ~ formattedTokenBalance:", formattedTokenBalance)
-
-
-
-              document.getElementById('btnConnect').style.display = 'none';
-              document.getElementById('btnDisconnect').style.display = 'inline';
-
-              document.getElementById('status').innerText = `Estado: Conectado a la cuenta ${address}`;
-              document.getElementById('erc20Balance').style.display = 'block';
-              document.getElementById('ethBalance').style.display = 'block';
-              document.getElementById('sendERC20Fields').style.display = 'block';
-              document.getElementById('sendETHFields').style.display = 'block';
-
-              document.getElementById('ethBalance').innerText = `Balance de Wallet: ${formattedBalance} ETH`;
-              document.getElementById('erc20Balance').innerText = `Balance del Token: ${formattedTokenBalance}`;
-            }
-            else {
-              console.error('Metamask not detected');
-            }
-          }
-
-          async function disconnectWallet() {
-            provider = null;
-            signer = null;
-            address = null;
-
-            document.getElementById('status').innerText = "Estado: Desconectado";
-            document.getElementById('btnConnect').style.display = 'inline';
-            document.getElementById('btnDisconnect').style.display = 'none';   
-            document.getElementById('sendERC20Fields').style.display = 'none';
-            document.getElementById('sendETHFields').style.display = 'none';   
-            document.getElementById('erc20Balance').style.display = 'none';
-            document.getElementById('ethBalance').style.display = 'none';                              
-          }
-
-          async function sendETH() {
-
-            const recipientAddress = document.getElementById('ethRecipientAddress').value;
-            const amount = document.getElementById('ethAmount').value;
-
-            if(!ethers.isAddress(recipientAddress)) {
-              alert('Direcci�n de destinatario inv�lida');
-              return;
-            }
-
-            if(isNaN(amount) || amount <= 0) {
-              alert('Monto inv�lido');
-              return;
-            }
+        }
+        //ABI_B
+        async function loadABI_B() {
             try {
-              const tx = {
-                to: recipientAddress,
-                value: ethers.parseEther(amount)
-              };
-              const txResponse = await signer.sendTransaction(tx);
-
-              await txResponse.wait();
-
-              console.log("?? ~ sendETH ~ txResponse", txResponse)
-              alert(`Transacci�n enviada con �xito: ${txResponse.hash}`);
-
+              // Asegúrate de que el archivo JSON esté accesible en tu servidor (debe ser accesible desde el cliente)
+              const response = await fetch('assets/tokenB_ABI.json');
+              const dataB = await response.json();
+              console.log('ABI Token B')
+              //console.log(data)
+              return dataB.abi;  // Devuelve el ABI que contiene la información del contrato
             } catch (error) {
-              console.error('Error sending ETH', error);
-              alert('Error enviando ETH');
-            }
+              console.error('Error loading ABI:', error);
           }
-          
-          async function sendToken() {
-            const recipientAddress = document.getElementById('recipientAddress').value;
-            const amount = document.getElementById('tokenAmount').value;
-
-
-            if (!ethers.isAddress(recipientAddress)) {
-              alert("Direcci�n inv�lida.");
-              return;
-            }
-
-            if (isNaN(amount) || amount <= 0) {
-              alert("Monto inv�lido.");
-              return;
-            }
-            
+        }
+        //ABI_Dex
+        async function loadABI_Dex() {
             try {
-              const decimals = await contract.decimals();
+              // Asegúrate de que el archivo JSON esté accesible en tu servidor (debe ser accesible desde el cliente)
+              const response = await fetch('assets/simpleDex_ABI.json');
+              const dataDex = await response.json();
+              console.log('ABI Simple Dex')
+              //console.log(data)
+              return dataDex.abi;  // Devuelve el ABI que contiene la información del contrato
+            } catch (error) {
+              console.error('Error loading ABI SimpleDex:', error);
+          }
+        }
+
+        async function connectWallet() {
+          console.log('Connecting wallet...');
+
+          if(window.ethereum) {
+            console.log('Metamask detected');
+
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+
+            // DATOS DE LA WALLET:
+            address = await signer.getAddress();
+            console.log("🚀 ~ connectWallet ~ address:", address)
+            // BALANCE ETH:
+            const balance = await provider.getBalance(address)
+            const formattedBalance = ethers.formatEther(balance);
+            console.log("?? ~ connectWallet ~ formattedBalance:", formattedBalance)
+
+            //Contrato tokenA:
+            const abiA = await loadABI_A();
+            console.log('ABI A cargado, creando contrato');
+            contractA = new ethers.Contract(TOKEN_ADDRESS_A, abiA, signer);
+            console.log("Contrato conectado", contractA);
+            const decimalsA = await contractA.decimals();
+            console.log('decimales: ', decimalsA)
+            const tokenBalanceA = await contractA.balanceOf(address);
+            const formattedTokenBalanceA = ethers.formatUnits(tokenBalanceA, decimalsA);
+            console.log("?? ~ connectWallet ~ formattedTokenBalance:", formattedTokenBalanceA)
+
+            //Contrato tokenB:
+            const abiB = await loadABI_B();
+            console.log('ABI B cargado, creando contrato');
+            contractB = new ethers.Contract(TOKEN_ADDRESS_B, abiB, signer);
+            console.log("Contrato conectado", contractB);
+            const decimalsB = await contractB.decimals();
+            console.log('decimales: ', decimalsB)
+            const tokenBalanceB = await contractB.balanceOf(address);
+            const formattedTokenBalanceB = ethers.formatUnits(tokenBalanceB, decimalsB);
+            console.log("?? ~ connectWallet ~ formattedTokenBalance:", formattedTokenBalanceB)
+
+            //Contrato SimpleDex:
+            const abiDex = await loadABI_Dex();
+            console.log('ABI Dex cargado, creando contrato');
+            contractDex = new ethers.Contract(SIMPLE_DEX_ADDRESS, abiDex, signer);
+            console.log("Contrato conectado", contractDex);
+            // const decimalsDex = await contractDex.decimals();
+            // console.log('decimales: ', decimalsB)
+            // const tokenBalanceB = await contractB.balanceOf(address);
+            // const formattedTokenBalanceB = ethers.formatUnits(tokenBalanceB, decimalsB);
+            // console.log("?? ~ connectWallet ~ formattedTokenBalance:", formattedTokenBalanceB)
+            
+            // PRECIO TOKENS:
+            const precioTKA  = await contractDex.obtenerPrecio(TOKEN_ADDRESS_A);
+            const decimalsTKA = await contractA.decimals();
+            const formattedprecioTKA = ethers.formatUnits(precioTKA, decimalsTKA);
+            const cantidadTKA = await contractDex.reservaA();
+            const formattedcantidadTKA = ethers.formatUnits(cantidadTKA, decimalsTKA);
+
+            const precioTKB  = await contractDex.obtenerPrecio(TOKEN_ADDRESS_B)
+            const decimalsTKB = await contractB.decimals();
+            const formattedprecioTKB = ethers.formatUnits(precioTKB, decimalsTKB);
+            const cantidadTKB = await contractDex.reservaB();
+            const formattedcantidadTKB = ethers.formatUnits(cantidadTKB, decimalsTKB);
+
+
+            document.getElementById('btnConnect').style.display = 'none';
+            document.getElementById('btnDisconnect').style.display = 'inline';
+
+            document.getElementById('status').innerText = `Estado: Conectado a la cuenta ${address}`;
+            document.getElementById('card1').style.display = 'block';
+            document.getElementById('erc20BalanceA').style.display = 'block';
+            document.getElementById('erc20BalanceB').style.display = 'block';
+            document.getElementById('ethBalance').style.display = 'block';
+            document.getElementById('sendERC20Fields').style.display = 'block';
+            document.getElementById('simpleDexFields').style.display = 'block';
+            document.getElementById('sendERC20Fields2').style.display = 'block';
+            document.getElementById('sendETHFields').style.display = 'block';
+
+            document.getElementById('ethBalance').innerText = `Balance de Wallet: ${formattedBalance} ETH`;
+            document.getElementById('erc20BalanceA').innerText = `Balance del Token A: ${formattedTokenBalanceA}`;
+            document.getElementById('erc20BalanceB').innerText = `Balance del Token B: ${formattedTokenBalanceB}`;
+
+            document.getElementById('precioTKA').innerText = `Precio TKA: ${formattedprecioTKA}`;
+            document.getElementById('precioTKB').innerText = `Precio TKB: ${formattedprecioTKB}`;
+            document.getElementById('cantidadTKA').innerText = `Stock TKA: ${formattedcantidadTKA}`;
+            document.getElementById('cantidadTKB').innerText = `Stock TKB: ${formattedcantidadTKB}`;
+          }
+          else {
+            console.error('Metamask not detected');
+          }
+        }
+
+        async function disconnectWallet() {
+          provider = null;
+          signer = null;
+          address = null;
+
+          document.getElementById('status').innerText = "Estado: Desconectado";
+          document.getElementById('btnConnect').style.display = 'inline';
+          document.getElementById('btnDisconnect').style.display = 'none';   
+          document.getElementById('sendERC20Fields').style.display = 'none';
+          document.getElementById('sendERC20Fields2').style.display = 'none';
+          document.getElementById('sendETHFields').style.display = 'none'; 
+          document.getElementById('simpleDexFields').style.display = 'none';  
+          document.getElementById('card1').style.display = 'none';
+          document.getElementById('erc20BalanceA').style.display = 'none';
+          document.getElementById('erc20BalanceB').style.display = 'none';
+          document.getElementById('ethBalance').style.display = 'none';                              
+        }
+
+        async function sendETH() {
+
+          const recipientAddress = document.getElementById('ethRecipientAddress').value;
+          const amount = document.getElementById('ethAmount').value;
+
+          if(!ethers.isAddress(recipientAddress)) {
+            alert('Direcci�n de destinatario inv�lida');
+            return;
+          }
+          if(isNaN(amount) || amount <= 0) {
+            alert('Monto inv�lido');
+            return;
+          }
+          try {
+            const tx = {
+              to: recipientAddress,
+              value: ethers.parseEther(amount)
+            };
+            const txResponse = await signer.sendTransaction(tx);
+
+            await txResponse.wait();
+
+            console.log("?? ~ sendETH ~ txResponse", txResponse)
+            alert(`Transacci�n enviada con �xito: ${txResponse.hash}`);
+
+          } catch (error) {
+            console.error('Error sending ETH', error);
+            alert('Error enviando ETH');
+          }
+        }
+        async function sendTKA() {
+
+          const recipientAddress = document.getElementById('ethRecipientAddress').value;
+          const amount = document.getElementById('tkaAmount').value;
+
+          if(!ethers.isAddress(recipientAddress)) {
+            alert('Direcci�n de destinatario inv�lida');
+            return;
+          }
+          if(isNaN(amount) || amount <= 0) {
+            alert('Monto inv�lido');
+            return;
+          }
+          try {
+              const decimals = await contractA.decimals();
               const amountToSend = ethers.parseUnits(amount, decimals);
 
-              const txApproval = await contract.approve(recipientAddress, amountToSend);
+              const txApproval = await contractA.approve(recipientAddress, amountToSend);
               await txApproval.wait();
-
-              const tx = await contract.transfer(recipientAddress, amountToSend);
-
+              const tx = await contractA.transfer(recipientAddress, amountToSend);
               await tx.wait();
-
-              console.log("?? ~ sendToken ~ tx", tx)
+              console.log("?? ~ sendTKA ~ tx", tx)
               alert(`Transacci�n enviada con �xito: ${tx.hash}`);
 
             } catch (error) {
-              console.error('Error sending ERC20', error);
-              alert('Error enviando ERC20');
-            }
+              console.error('Error sending TKA', error);
+              alert('Error enviando TKA');
+          }
+        }
+        async function sendTKB() {
+          const recipientAddress = document.getElementById('tkbRecipientAddress').value;
+          const amount = document.getElementById('tkbAmount').value;
+
+          if(!ethers.isAddress(recipientAddress)) {
+            alert('Direcci�n de destinatario inv�lida');
+            return;
+          }
+          if(isNaN(amount) || amount <= 0) {
+            alert('Monto inv�lido');
+            return;
+          }
+          try {
+              const decimals = await contractB.decimals();
+              const amountToSend = ethers.parseUnits(amount, decimals);
+
+              const txApproval = await contractB.approve(recipientAddress, amountToSend);
+              await txApproval.wait();
+              const tx = await contractB.transfer(recipientAddress, amountToSend);
+              await tx.wait();
+              console.log("?? ~ sendTKB ~ tx", tx)
+              alert(`Transacci�n enviada con �xito: ${tx.hash}`);
+
+            } catch (error) {
+              console.error('Error sending TKB', error);
+              alert('Error enviando TKB');
+          }
+        }
+        
+        async function swapTKA() {
+          const tkaCantidad = document.getElementById('tkaCantidad').value;
+          console.log(tkaCantidad);
+
+          if (isNaN(tkaCantidad) || tkaCantidad <= 0) {
+            alert("Monto inv�lido.");
+            return;
+          }
+            const decimalsTKA = await contractA.decimals();
+            console.log(decimalsTKA)
+            const amountToSwap = ethers.parseUnits(tkaCantidad, decimalsTKA);
+            console.log(amountToSwap);
+          try {
+            
+
+            // const txApproval = await contractA.approve(address, amountToSwap);
+            // await txApproval.wait();
+
+            const txSwap = await contractDex.intercambiarAporB(amountToSwap);
+            await txSwap.wait();            
+
+            console.log("?? ~ swapTKA ~ tx", txSwap)
+            alert(`Swap realizado con �xito: ${txSwap.hash}`);
+
+          } catch (error) {
+            console.error('Swap interrumpido', error);
+            alert('Swap interrumpido');
+          }
+        }
+        async function swapTKB() {
+          const tkbCantidad = document.getElementById('tkbCantidad').value;
+
+          if (isNaN(tkbCantidad) || tkbCantidad <= 0) {
+            alert("Monto inv�lido.");
+            return;
+          }
+          try {
+            const decimalsTKB = await contractB.decimals();
+            const amountToSwap = ethers.parseUnits(tkbCantidad, decimalsTKB);
+
+            const txSwap = await contractDex.intercambiarBporA(amountToSwap);
+            await txSwap.wait();            
+
+            console.log("?? ~ swapTKB ~ tx", tx)
+            alert(`Swap realizado con �xito: ${tx.hash}`);
+
+          } catch (error) {
+            console.error('Swap interrumpido', error);
+            alert('Swap interrumpido');
+          }
+        }
+
+        async function sendToken() {
+          const recipientAddress = document.getElementById('recipientAddress').value;
+          const amount = document.getElementById('tokenAmount').value;
+
+
+          if (!ethers.isAddress(recipientAddress)) {
+            alert("Direcci�n inv�lida.");
+            return;
           }
 
-          document.getElementById('btnConnect').addEventListener('click', connectWallet);
-          document.getElementById('btnDisconnect').addEventListener('click', disconnectWallet);
-          document.getElementById('btnSendETH').addEventListener('click', sendETH);
+          if (isNaN(amount) || amount <= 0) {
+            alert("Monto inv�lido.");
+            return;
+          }
+          
+          try {
+            const decimals = await contract.decimals();
+            const amountToSend = ethers.parseUnits(amount, decimals);
 
-        </script>
+            const txApproval = await contract.approve(recipientAddress, amountToSend);
+            await txApproval.wait();
 
-    </body>
+            const tx = await contract.transfer(recipientAddress, amountToSend);
+
+            await tx.wait();
+
+            console.log("?? ~ sendToken ~ tx", tx)
+            alert(`Transacci�n enviada con �xito: ${tx.hash}`);
+
+          } catch (error) {
+            console.error('Error sending ERC20', error);
+            alert('Error enviando ERC20');
+          }
+        }
+
+        document.getElementById('btnConnect').addEventListener('click', connectWallet);
+        document.getElementById('btnDisconnect').addEventListener('click', disconnectWallet);
+        // document.getElementById('btnSendETH').addEventListener('click', sendETH);
+        document.getElementById('btnSendTKA').addEventListener('click', sendTKA);
+        document.getElementById('btnSendTKB').addEventListener('click', sendTKB);
+        document.getElementById('btnSwapTKA').addEventListener('click', swapTKA);
+        document.getElementById('btnSwapTKB').addEventListener('click', swapTKB);
+
+      </script>
+
+  </body>
 </html>

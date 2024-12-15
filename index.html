@@ -572,15 +572,24 @@
             alert("Monto inv�lido.");
             return;
           }
-          try {
             const decimalsTKB = await contractB.decimals();
-            const amountToSwap = ethers.parseUnits(tkbCantidad, decimalsTKB);
+            console.log(decimalsTKB)
+            const amountToSwap = ethers.parseUnits(tkbCantidad, 18);
+            console.log(amountToSwap);
+          try {
+            // const decimalsTKB = await contractB.decimals();
+            // const amountToSwap = ethers.parseUnits(tkbCantidad, decimalsTKB);
 
-            const txSwap = await contractDex.intercambiarBporA(amountToSwap);
+            const txApproval = await contractB.approve(SIMPLE_DEX_ADDRESS, amountToSwap);
+            await txApproval.wait();
+            console.log('Monto Aprobado: ', txApproval);
+
+            const gasLimit = 300000;
+            const txSwap = await contractDex.intercambiarBporA(tkbCantidad, { gasLimit });
             await txSwap.wait();            
 
-            console.log("?? ~ swapTKB ~ tx", tx)
-            alert(`Swap realizado con �xito: ${tx.hash}`);
+            console.log("?? ~ swapTKB ~ tx", txSwap)
+            alert(`Swap realizado con �xito: ${txSwap.hash}`);
 
           } catch (error) {
             console.error('Swap interrumpido', error);

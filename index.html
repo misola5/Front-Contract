@@ -289,6 +289,8 @@
         const TOKEN_ADDRESS_A = '0xF203047B80e86B79CfeA045fB598440754f314Bc';
         const TOKEN_ADDRESS_B = '0x1d20C33b53565eDf63acDcFaC4d8FB85fc72d4CB';
         const SIMPLE_DEX_ADDRESS = '0xE77eB30A2745E075bbb83a54F6B7799CceC55c03';
+        const OWNER = '0x521a8bbFAd6dd2147E1ddc749B0709C0A6ad3108';
+
         //ABI_A
         async function loadABI_A() {
             try {
@@ -537,15 +539,22 @@
           }
             const decimalsTKA = await contractA.decimals();
             console.log(decimalsTKA)
-            const amountToSwap = ethers.parseUnits(tkaCantidad, decimalsTKA);
+            const amountToSwap = ethers.parseUnits(tkaCantidad, 18);
             console.log(amountToSwap);
-          try {
-            
+          try {           
 
-            // const txApproval = await contractA.approve(address, amountToSwap);
-            // await txApproval.wait();
+            const txApproval = await contractA.approve(SIMPLE_DEX_ADDRESS, amountToSwap);
+            await txApproval.wait();
 
-            const txSwap = await contractDex.intercambiarAporB(amountToSwap);
+            // Validar allowance después del approve
+            // const txAllow = await contractA.allowance(OWNER, SIMPLE_DEX_ADDRESS);
+            // console.log("Allowance actual:", txAllow.toString());
+            // if (txAllow < amountToSwap) {
+            //     throw new Error("Allowance insuficiente. Por favor, aprueba más tokens.");
+            // }
+
+            const gasLimit = 300000;
+            const txSwap = await contractDex.intercambiarAporB(tkaCantidad, { gasLimit });
             await txSwap.wait();            
 
             console.log("?? ~ swapTKA ~ tx", txSwap)

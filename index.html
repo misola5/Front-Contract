@@ -138,16 +138,19 @@
         <!-- SimpleDex -->    
         <div id="simpleDexFields" style="display:none;" class="bg-white p-6 rounded-lg shadow-md mt-6">
           <h2 class="text-2xl font-semibold text-gray-800 mb-4">SimpleDex</h2>
-          <div>
-            <div>
-              <span id="precioTKA"  class="text-center text-xl text-gray-800 mt-4">Precio Token A: </span>
-              <span id="cantidadTKA" class="text-center text-xl text-gray-800 mt-4">Stock: </span>
+          <div class="p-6 bg-gray-100 rounded-lg shadow-md">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <span id="precioTKA" class="block text-lg font-semibold text-gray-700">Precio Token A:</span>
+                <span id="cantidadTKA" class="block text-sm text-gray-600">Stock:</span>
+              </div>
+              <div class="text-right">
+                <span id="precioTKB" class="block text-lg font-semibold text-gray-700">Precio Token B:</span>
+                <span id="cantidadTKB" class="block text-sm text-gray-600">Stock:</span>
+              </div>
             </div>
-            <div>
-              <span id="precioTKB"  class="text-center text-xl text-gray-800 mt-4">Precio Token B: </span>
-              <span id="cantidadTKB" class="text-center text-xl text-gray-800 mt-4">Stock: </span>
-            </div>            
-          </div>       
+          </div> 
+                 
           
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal3">
             SWAP TKA -> TKB
@@ -223,7 +226,7 @@
                 </div>
                 <div class="modal-body">
                   <div  class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token A</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Agregar Liquidez</h2>
                     <label for="tkaliquid" class="block text-gray-700">Liquidez TKA</label>
                     <input type="text" id="tkaliquid" placeholder="Monto TKA" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     

@@ -209,6 +209,7 @@
               </div>
             </div>
           </div>  
+          <!-- -------------------------AGREGAR LIQUIDEZ----------------------------- -->
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal5">
             Agregar Liquidez
           </button>
@@ -217,19 +218,19 @@
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Enviar TKA</h5>
+                  <h5 class="modal-title" id="exampleModalLabel">Agregar liquidez</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                   <div  class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enviar Token A</h2>
-                    <label for="ethRecipientAddress" class="block text-gray-700">Dirección del destinatario:</label>
-                    <input type="text" id="ethRecipientAddress" placeholder="Dirección Scroll Sepolia" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="tkaliquid" class="block text-gray-700">Liquidez TKA</label>
+                    <input type="text" id="tkaliquid" placeholder="Monto TKA" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     
-                    <label for="tkaAmount" class="block text-gray-700 mt-4">Monto (TKA):</label>
-                    <input type="number" id="tkaAmount" placeholder="Monto en TKA" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="tkbliquid" class="block text-gray-700 mt-4">Liquidez TKB</label>
+                    <input type="number" id="tkbliquid" placeholder="Monto TKB" class="w-full mt-2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     
-                    <button id="btnSendTKA" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Enviar TKA</button>
+                    <button id="liquidAdd" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition mt-4">Agregar Liquidez</button>
                   </div> 
                 </div>
                 <div class="modal-footer">
@@ -239,6 +240,7 @@
               </div>
             </div>
           </div> 
+          <!-- -----------------------RETIRAR LIQUIDEZ-------------------------- -->
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal6">
             Retirar Liquidez
           </button>
@@ -539,7 +541,7 @@
           }
             const decimalsTKA = await contractA.decimals();
             console.log(decimalsTKA)
-            const amountToSwap = ethers.parseUnits(tkaCantidad, 18);
+            const amountToSwap = ethers.parseUnits(tkaCantidad, decimalsTKA);
             console.log(amountToSwap);
           try {           
 
@@ -574,7 +576,7 @@
           }
             const decimalsTKB = await contractB.decimals();
             console.log(decimalsTKB)
-            const amountToSwap = ethers.parseUnits(tkbCantidad, 18);
+            const amountToSwap = ethers.parseUnits(tkbCantidad, decimalsTKB);
             console.log(amountToSwap);
           try {
             // const decimalsTKB = await contractB.decimals();
@@ -594,6 +596,46 @@
           } catch (error) {
             console.error('Swap interrumpido', error);
             alert('Swap interrumpido');
+          }
+        }
+
+        async function liquidAdd(){
+
+          const tkaLiquid = document.getElementById('tkaliquid').value;
+          const tkbLiquid = document.getElementById('tkbliquid').value;
+          if (isNaN(tkaLiquid) || tkaLiquid <= 0) {
+            alert("Monto inv�lido.");
+            return;
+          }
+          if (isNaN(tkbLiquid) || tkbLiquid <= 0) {
+            alert("Monto inv�lido.");
+            return;
+          }
+            const decimalsTKA = await contractA.decimals();
+            const amountToSwapA = ethers.parseUnits(tkaLiquid, decimalsTKA);
+            console.log('Monto a aprobar de TKB', amountToSwapA)
+            const decimalsTKB = await contractB.decimals();
+            const amountToSwapB = ethers.parseUnits(tkbLiquid, decimalsTKB);
+            console.log('Monto a aprobar de TKB',amountToSwapB);
+
+            try {           
+
+              const txApprovalA = await contractA.approve(SIMPLE_DEX_ADDRESS, amountToSwapA);
+              await txApprovalA.wait();
+              console.log('Monto TKA aprobado!');
+              const txApprovalB = await contractB.approve(SIMPLE_DEX_ADDRESS, amountToSwapB);
+              await txApprovalB.wait();
+              console.log('Monto TKB aprobado!');
+
+              const txliquid = await contractDex.agregarLiquidez (tkaLiquid, tkbLiquid);
+              await txliquid.wait();
+
+              console.log("?? ~ liquidAdd ~ tx", txliquid)
+             alert(`Liquidez agregada con �xito: ${txliquid.hash}`);
+
+            } catch (error) {
+            console.error('No se ah podido agregar liquidez', error);
+            alert('No se ah podido agregar liquidez');
           }
         }
 
@@ -639,6 +681,8 @@
         document.getElementById('btnSendTKB').addEventListener('click', sendTKB);
         document.getElementById('btnSwapTKA').addEventListener('click', swapTKA);
         document.getElementById('btnSwapTKB').addEventListener('click', swapTKB);
+
+        document.getElementById('liquidAdd').addEventListener('click', liquidAdd);
 
       </script>
 
